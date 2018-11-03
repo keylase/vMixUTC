@@ -27,14 +27,19 @@ namespace vMixController.Widgets
     [Serializable]
     public class vMixControlButton : vMixControl
     {
+        [NonSerialized]
         NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
         const string VARIABLEPREFIX = "_var";
         static DateTime _lastShadowUpdate = DateTime.Now;
         static object _locker = new object();
         Stack<bool?> _conditions = new Stack<bool?>();
+        [NonSerialized]
         CultureInfo _culture;
+        [NonSerialized]
         BackgroundWorker _activeStateUpdateWorker, _executionWorker;
+        [NonSerialized]
         DispatcherTimer _blinker;
+        [NonSerialized]
         Color _defaultBorderColor;
 
         [NonSerialized]
@@ -97,7 +102,7 @@ namespace vMixController.Widgets
         /// </summary>
         public const string BlinkBorderColorPropertyName = "BlinkBorderColor";
         [NonSerialized]
-        private Color _blinkBorderColor = ViewModel.vMixControlSettingsViewModel.Colors[0].B;
+        private Color _blinkBorderColor = ViewModel.vMixWidgetSettingsViewModel.Colors[0].B;
 
         /// <summary>
         /// Sets and gets the BorderColor property.
@@ -683,6 +688,15 @@ namespace vMixController.Widgets
                             case NativeFunctions.EXECLINK:
                                 Dispatcher.Invoke(() => Messenger.Default.Send<string>(cmd.StringParameter));
                                 break;
+                            case NativeFunctions.LIVETOGGLE:
+                                Dispatcher.Invoke(() => Messenger.Default.Send<LIVEToggleMessage>(new LIVEToggleMessage() { State = 2 }));
+                                break;
+                            case NativeFunctions.LIVEOFF:
+                                Dispatcher.Invoke(() => Messenger.Default.Send<LIVEToggleMessage>(new LIVEToggleMessage() { State = 0 }));
+                                break;
+                            case NativeFunctions.LIVEON:
+                                Dispatcher.Invoke(() => Messenger.Default.Send<LIVEToggleMessage>(new LIVEToggleMessage() { State = 1 }));
+                                break;
                             case NativeFunctions.CONDITION:
                                 _conditions.Push(cond.HasValue && cond.Value ? new bool?(TestCondition(cmd)) : null);
                                 break;
@@ -713,11 +727,14 @@ namespace vMixController.Widgets
                             var path = string.Format(cmd.Action.ActiveStatePath, cmd.InputKey, CalculateExpression<int>(cmd.Parameter), Dispatcher.Invoke(() => CalculateObjectParameter(cmd)), CalculateExpression<int>(cmd.Parameter) - 1, input.HasValue ? input.Value : 0);
                             var value = cmd.Action.StateValue == "Input" ? (object)cmd.InputKey : (cmd.Action.StateValue == "String" ? Dispatcher.Invoke(() => CalculateObjectParameter(cmd)).ToString() : (object)CalculateExpression<int>(cmd.Parameter));
                             SetValueByPath(state, path, value);
+                            int flag = 0;
                             while (GetValueByPath(state, path) != value)
                             {
                                 Thread.Sleep(50);
                                 if (_stopThread)
                                     return;
+                                if (++flag > 10)
+                                    break;
                             }
                         }
                         _waitBeforeUpdate = Math.Max(_internalState.Transitions[cmd.Action.TransitionNumber].Duration, _waitBeforeUpdate);
@@ -771,7 +788,7 @@ namespace vMixController.Widgets
             return base.GetPropertiesControls().Concat(new UserControl[] { boolctrl, control }).ToArray();
         }
 
-        public override void SetProperties(vMixControlSettingsViewModel viewModel)
+        public override void SetProperties(vMixWidgetSettingsViewModel viewModel)
         {
             _blinker.Stop();
             base.SetProperties(viewModel);

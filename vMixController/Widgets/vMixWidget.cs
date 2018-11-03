@@ -59,7 +59,7 @@ namespace vMixController.Widgets
             _shadowUpdate.Interval = TimeSpan.FromSeconds(1);
             _shadowUpdate.Tick += _shadowUpdate_Tick;
             _shadowUpdate.Start();
-            WindowProperties = ((ViewModelLocator)Application.Current.FindResource("Locator")).ControlSettings.WindowProperties;
+            WindowProperties = ((ViewModelLocator)Application.Current.FindResource("Locator")).WidgetSettings.WindowProperties;
         }
 
         private void _shadowUpdate_Tick(object sender, EventArgs e)
@@ -208,7 +208,7 @@ namespace vMixController.Widgets
         /// </summary>
         public const string ColorPropertyName = "Color";
         [NonSerialized]
-        private Color _color = ViewModel.vMixControlSettingsViewModel.Colors[0].A;
+        private Color _color = ViewModel.vMixWidgetSettingsViewModel.Colors[0].A;
 
         /// <summary>
         /// Sets and gets the Color property.
@@ -238,7 +238,7 @@ namespace vMixController.Widgets
         /// </summary>
         public const string BorderColorPropertyName = "BorderColor";
         [NonSerialized]
-        private Color _borderColor = ViewModel.vMixControlSettingsViewModel.Colors[0].B;
+        private Color _borderColor = ViewModel.vMixWidgetSettingsViewModel.Colors[0].B;
 
         /// <summary>
         /// Sets and gets the BorderColor property.
@@ -726,7 +726,7 @@ namespace vMixController.Widgets
             if (items != null && items.Length > 1 && found != null)
                 SetValueByPath(found, items.Skip(1).Aggregate((x, y) => x + "." + y), value);
             else if (found_prop != null && found_prop.PropertyType == value.GetType())
-                Dispatcher.Invoke(()=>found_prop.SetValue(obj, value));
+                Dispatcher.Invoke(() => found_prop.SetValue(obj, value));
         }
 
         protected T GetValueByPath<T>(object obj, string path)
@@ -775,7 +775,7 @@ namespace vMixController.Widgets
         {
             if (_hotkey == null)
                 _hotkey = GetHotkeys();
-            else 
+            else
             {
                 //UpdateHotkeys
                 var hk = _hotkey;
@@ -802,11 +802,11 @@ namespace vMixController.Widgets
             return new UserControl[0];
         }
 
-        public virtual void SetProperties(ViewModel.vMixControlSettingsViewModel viewModel)
+        public virtual void SetProperties(ViewModel.vMixWidgetSettingsViewModel viewModel)
         {
             Name = viewModel.Name;
             Color = viewModel.Color;
-            BorderColor = vMixController.ViewModel.vMixControlSettingsViewModel.Colors.Where(x => x.A == viewModel.Color).FirstOrDefault().B;
+            BorderColor = vMixController.ViewModel.vMixWidgetSettingsViewModel.Colors.Where(x => x.A == viewModel.Color).FirstOrDefault().B;
             Hotkey = viewModel.Hotkey.ToArray();
 
             WindowProperties = viewModel.WindowProperties;
@@ -853,7 +853,7 @@ namespace vMixController.Widgets
                     ControlsStoreUsage.Remove(item);
         }
 
-
+        [NonSerialized]
         private RelayCommand<System.Windows.Input.KeyEventArgs> _previewKeyUp;
 
         /// <summary>
@@ -879,7 +879,7 @@ namespace vMixController.Widgets
                             FocusManager.SetFocusedElement(parent, (IInputElement)parent);
                             //MoveFocus
                             ((FrameworkElement)parent).MoveFocus(new TraversalRequest(FocusNavigationDirection.Last) { });
-                            
+
 
 
                             GalaSoft.MvvmLight.Messaging.Messenger.Default.Send(new Pair<string, bool>() { A = "Hotkeys", B = true });
@@ -887,7 +887,7 @@ namespace vMixController.Widgets
                     }));
             }
         }
-
+        [NonSerialized]
         private RelayCommand<RoutedEventArgs> _gotFocus;
 
         /// <summary>
@@ -905,7 +905,7 @@ namespace vMixController.Widgets
                     }));
             }
         }
-
+        [NonSerialized]
         private RelayCommand<RoutedEventArgs> _lostFocus;
 
         /// <summary>

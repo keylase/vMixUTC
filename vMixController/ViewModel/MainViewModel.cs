@@ -1,7 +1,7 @@
 ﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using GalaSoft.MvvmLight.Messaging;
-using Microsoft.Practices.ServiceLocation;
+using CommonServiceLocator;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,7 +32,7 @@ namespace vMixController.ViewModel
     /// </summary>
     public class MainViewModel : ViewModelBase, IDisposable
     {
-        vMixControlSettingsView _settings = null;// new vMixControlSettingsView();
+        vMixWidgetSettingsView _settings = null;// new vMixWidgetSettingsView();
         NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
         /// <summary>
         /// The <see cref="Model" /> property's name.
@@ -46,6 +46,36 @@ namespace vMixController.ViewModel
         Point _relativeClickPoint;
         Thickness _rawSelectorPosition = new Thickness();
         bool _isHotkeysEnabled = true;
+
+        /// <summary>
+        /// The <see cref="IsFiltersRegistered" /> property's name.
+        /// </summary>
+        public const string IsFiltersRegisteredPropertyName = "IsFiltersRegistered";
+
+        private bool _isFiltersRegistered = false;
+
+        /// <summary>
+        /// Sets and gets the IsFiltersRegistered property.
+        /// Changes to that property's value raise the PropertyChanged event. 
+        /// </summary>
+        public bool IsFiltersRegistered
+        {
+            get
+            {
+                return _isFiltersRegistered;
+            }
+
+            set
+            {
+                if (_isFiltersRegistered == value)
+                {
+                    return;
+                }
+
+                _isFiltersRegistered = value;
+                RaisePropertyChanged(IsFiltersRegisteredPropertyName);
+            }
+        }
 
         /*Selector*/
         /// <summary>
@@ -323,32 +353,32 @@ namespace vMixController.ViewModel
         }
 
         /// <summary>
-        /// The <see cref="ControlTemplates" /> property's name.
+        /// The <see cref="WidgetTemplates" /> property's name.
         /// </summary>
-        public const string ControlTemplatesPropertyName = "ControlTemplates";
+        public const string WidgetTemplatesPropertyName = "WidgetTemplates";
 
-        private ObservableCollection<Pair<string, vMixControl>> _controlTemplates = new ObservableCollection<Pair<string, vMixControl>>();
+        private ObservableCollection<Pair<string, vMixControl>> _widgetTemplates = new ObservableCollection<Pair<string, vMixControl>>();
 
         /// <summary>
-        /// Sets and gets the ControlTemplates property.
+        /// Sets and gets the WidgetTemplates property.
         /// Changes to that property's value raise the PropertyChanged event. 
         /// </summary>
-        public ObservableCollection<Pair<string, vMixControl>> ControlTemplates
+        public ObservableCollection<Pair<string, vMixControl>> WidgetTemplates
         {
             get
             {
-                return _controlTemplates;
+                return _widgetTemplates;
             }
 
             set
             {
-                if (_controlTemplates == value)
+                if (_widgetTemplates == value)
                 {
                     return;
                 }
 
-                _controlTemplates = value;
-                RaisePropertyChanged(ControlTemplatesPropertyName);
+                _widgetTemplates = value;
+                RaisePropertyChanged(WidgetTemplatesPropertyName);
             }
         }
 
@@ -383,32 +413,32 @@ namespace vMixController.ViewModel
         }
 
         /// <summary>
-        /// The <see cref="Controls" /> property's name.
+        /// The <see cref="Widgets" /> property's name.
         /// </summary>
-        public const string ControlsPropertyName = "Controls";
+        public const string WidgetsPropertyName = "Widgets";
 
-        private ObservableCollection<vMixController.Widgets.vMixControl> _controls = new ObservableCollection<vMixController.Widgets.vMixControl>();
+        private ObservableCollection<vMixController.Widgets.vMixControl> _widgets = new ObservableCollection<vMixController.Widgets.vMixControl>();
 
         /// <summary>
-        /// Sets and gets the Controls property.
+        /// Sets and gets the Widgetss property.
         /// Changes to that property's value raise the PropertyChanged event. 
         /// </summary>
-        public ObservableCollection<vMixController.Widgets.vMixControl> Controls
+        public ObservableCollection<vMixController.Widgets.vMixControl> Widgets
         {
             get
             {
-                return _controls;
+                return _widgets;
             }
 
             set
             {
-                if (_controls == value)
+                if (_widgets == value)
                 {
                     return;
                 }
 
-                _controls = value;
-                RaisePropertyChanged(ControlsPropertyName);
+                _widgets = value;
+                RaisePropertyChanged(WidgetsPropertyName);
             }
         }
 
@@ -443,14 +473,51 @@ namespace vMixController.ViewModel
             }
         }
 
+        /// <summary>
+        /// The <see cref="LIVE" /> property's name.
+        /// </summary>
+        public const string LIVEPropertyName = "LIVE";
+
+        private bool _LIVE = true;
+
+        /// <summary>
+        /// Sets and gets the LIVE property.
+        /// Changes to that property's value raise the PropertyChanged event. 
+        /// </summary>
+        public bool LIVE
+        {
+            get
+            {
+                return _LIVE;
+            }
+
+            set
+            {
+                if (_LIVE == value)
+                {
+                    return;
+                }
+
+                foreach (var item in _widgets)
+                    if (item is vMixControlTextField)
+                    {
+                        ((vMixControlTextField)item).IsLive = value;
+                        //item.Update();
+                    }
+
+                _LIVE = value;
+                RaisePropertyChanged(LIVEPropertyName);
+            }
+        }
+
 
         #region Gets the build date and time (by reading the COFF header)
 
         // http://msdn.microsoft.com/en-us/library/ms680313
-
+#pragma warning disable CS0649
         struct _IMAGE_FILE_HEADER
         {
-            public ushort Machine;
+            public ushort Machinev;
             public ushort NumberOfSections;
             public uint TimeDateStamp;
             public uint PointerToSymbolTable;
@@ -458,6 +525,7 @@ namespace vMixController.ViewModel
             public ushort SizeOfOptionalHeader;
             public ushort Characteristics;
         };
+#pragma warning restore CS0649
 
         static DateTime GetBuildDateTime(Assembly assembly)
         {
@@ -529,36 +597,36 @@ namespace vMixController.ViewModel
             }
         }
 
-        private RelayCommand<vMixController.Widgets.vMixControl> _removeControlCommand;
+        private RelayCommand<vMixControl> _removeWidgetCommand;
 
         /// <summary>
-        /// Gets the RemoveControlCommand.
+        /// Gets the RemoveWidgetCommand.
         /// </summary>
-        public RelayCommand<vMixController.Widgets.vMixControl> RemoveControlCommand
+        public RelayCommand<vMixControl> RemoveWidgetCommand
         {
             get
             {
-                return _removeControlCommand
-                    ?? (_removeControlCommand = new RelayCommand<vMixController.Widgets.vMixControl>(
+                return _removeWidgetCommand
+                    ?? (_removeWidgetCommand = new RelayCommand<vMixController.Widgets.vMixControl>(
                     p =>
                     {
                         p.Dispose();
-                        Controls.Remove(p);
+                        Widgets.Remove(p);
                     }));
             }
         }
 
-        private RelayCommand<vMixControl> _copyControlCommand;
+        private RelayCommand<vMixControl> _copyWidgetCommand;
 
         /// <summary>
-        /// Gets the CopyControlCommand.
+        /// Gets the CopyWidgetCommand.
         /// </summary>
-        public RelayCommand<vMixControl> CopyControlCommand
+        public RelayCommand<vMixControl> CopyWidgetCommand
         {
             get
             {
-                return _copyControlCommand
-                    ?? (_copyControlCommand = new RelayCommand<vMixControl>(
+                return _copyWidgetCommand
+                    ?? (_copyWidgetCommand = new RelayCommand<vMixControl>(
                     p =>
                     {
                         try
@@ -569,7 +637,7 @@ namespace vMixController.ViewModel
                             copy.Left += 8;
                             copy.Top += 8;
                             copy.Update();
-                            _controls.Add(copy);
+                            _widgets.Add(copy);
                         }
                         catch (Exception e)
                         {
@@ -635,11 +703,11 @@ namespace vMixController.ViewModel
                         _isHotkeysEnabled = false;
 
                         _logger.Info("Opening properties for widget {0}.", p.Name);
-                        var viewModel = ServiceLocator.Current.GetInstance<vMixController.ViewModel.vMixControlSettingsViewModel>();
-                        viewModel.Control = p;
+                        var viewModel = ServiceLocator.Current.GetInstance<vMixController.ViewModel.vMixWidgetSettingsViewModel>();
+                        viewModel.Widget = p;
                         viewModel.SetProperties(p);
 
-                        _settings = new vMixControlSettingsView();
+                        _settings = new vMixWidgetSettingsView();
                         _settings.Owner = App.Current.MainWindow;
                         var result = _settings.ShowDialog();
                         if (result.HasValue && result.Value)
@@ -652,43 +720,45 @@ namespace vMixController.ViewModel
             }
         }
 
-        Action<Point> _createControl;
+        Action<Point> _createWidget;
 
-        private RelayCommand<string> _createControlCommand;
+        private RelayCommand<string> _createWidgetCommand;
 
         /// <summary>
-        /// Gets the CreateControlCommand.
+        /// Gets the CreateWidgetCommand.
         /// </summary>
-        public RelayCommand<string> CreateControlCommand
+        public RelayCommand<string> CreateWidgetCommand
         {
             get
             {
-                return _createControlCommand
-                    ?? (_createControlCommand = new RelayCommand<string>(
+                return _createWidgetCommand
+                    ?? (_createWidgetCommand = new RelayCommand<string>(
                     p =>
                     {
                         EditorCursor = CursorType.Hand.ToString();
-                        _createControl = new Action<Point>(x =>
+                        _createWidget = new Action<Point>(x =>
                         {
-                            var control = (vMixControl)Assembly.GetAssembly(this.GetType()).CreateInstance("vMixController.Widgets.vMixControl" + p);
+                            var widget = (vMixControl)Assembly.GetAssembly(this.GetType()).CreateInstance("vMixController.Widgets.vMixControl" + p);
 
-                            var count = _controls.Where(y => y.GetType() == control.GetType()).Count();
+                            var count = _widgets.Where(y => y.GetType() == widget.GetType()).Count();
 
-                            if (control.MaxCount == -1 || control.MaxCount > count)
+                            if (widget.MaxCount == -1 || widget.MaxCount > count)
                             {
-                                control.State = Model;
-                                control.Top = x.Y;
-                                control.Left = x.X;
-                                control.AlignByGrid();
-                                control.Update();
-                                _controls.Add(control);
-                                _logger.Info("New {0} widget added.", control.Type.ToLower());
+                                widget.State = Model;
+                                widget.Top = x.Y;
+                                widget.Left = x.X;
+                                widget.AlignByGrid();
+                                if (widget is vMixControlTextField)
+                                    ((vMixControlTextField)widget).IsLive = LIVE;
+                                widget.Update();
+                                _widgets.Add(widget);
+                                _logger.Info("New {0} widget added.", widget.Type.ToLower());
 
-                                OpenPropertiesCommand.Execute(control);
+                                OpenPropertiesCommand.Execute(widget);
 
                             }
                             else
-                                control.Dispose();
+                                widget.Dispose();
                         });
 
                     }));
@@ -709,12 +779,12 @@ namespace vMixController.ViewModel
                     ?? (_mouseButtonUp = new RelayCommand<MouseButtonEventArgs>(
                     p =>
                     {
-                        if (_createControl != null)
+                        if (_createWidget != null)
                         {
                             EditorCursor = "Arrow";
                             var pos = p.MouseDevice.GetPosition((IInputElement)p.Source);
-                            _createControl(new Point(pos.X / WindowSettings.UIScale, pos.Y / WindowSettings.UIScale));
-                            _createControl = null;
+                            _createWidget(new Point(pos.X / WindowSettings.UIScale, pos.Y / WindowSettings.UIScale));
+                            _createWidget = null;
                         }
                         if ((p.OriginalSource is ListView))
                             _isHotkeysEnabled = true;
@@ -805,33 +875,33 @@ namespace vMixController.ViewModel
                     ?? (_contextMenuClosing = new RelayCommand<ContextMenuEventArgs>(
                     p =>
                     {
-                        if (_createControl != null && _fromContextMenu)
+                        if (_createWidget != null && _fromContextMenu)
                         {
                             EditorCursor = "Arrow";
                             var pos = _contextMenuPosition;
-                            _createControl(new Point(pos.X / WindowSettings.UIScale, pos.Y / WindowSettings.UIScale));
-                            _createControl = null;
+                            _createWidget(new Point(pos.X / WindowSettings.UIScale, pos.Y / WindowSettings.UIScale));
+                            _createWidget = null;
                             _fromContextMenu = false;
                         }
                     }));
             }
         }
 
-        private RelayCommand<Pair<string, vMixControl>> _createControlFromTemplateCommand;
+        private RelayCommand<Pair<string, vMixControl>> _createWidgetFromTemplateCommand;
 
         /// <summary>
-        /// Gets the CreateControlFromTemplateCommand.
+        /// Gets the CreateWidgetFromTemplateCommand.
         /// </summary>
-        public RelayCommand<Pair<string, vMixControl>> CreateControlFromTemplateCommand
+        public RelayCommand<Pair<string, vMixControl>> CreateWidgetFromTemplateCommand
         {
             get
             {
-                return _createControlFromTemplateCommand
-                    ?? (_createControlFromTemplateCommand = new RelayCommand<Pair<string, vMixControl>>(
+                return _createWidgetFromTemplateCommand
+                    ?? (_createWidgetFromTemplateCommand = new RelayCommand<Pair<string, vMixControl>>(
                     p =>
                     {
                         EditorCursor = "Hand";
-                        _createControl = x =>
+                        _createWidget = x =>
                         {
                             var ctrl = p.B.Copy();
                             ctrl.Left = x.X;
@@ -841,42 +911,42 @@ namespace vMixController.ViewModel
                             ctrl.AlignByGrid();
                             ctrl.Update();
                             _logger.Info("Widget \"{0}\" was copied.", p.B.Name);
-                            _controls.Add(ctrl);
+                            _widgets.Add(ctrl);
                         };
 
                     }));
             }
         }
 
-        private RelayCommand<Pair<string, vMixControl>> _removeControlTemplateCommand;
+        private RelayCommand<Pair<string, vMixControl>> _removeWidgetTemplateCommand;
 
         /// <summary>
-        /// Gets the RemoveControlTemplateCommand.
+        /// Gets the RemoveWidgetTemplateCommand.
         /// </summary>
-        public RelayCommand<Pair<string, vMixControl>> RemoveControlTemplateCommand
+        public RelayCommand<Pair<string, vMixControl>> RemoveWidgetTemplateCommand
         {
             get
             {
-                return _removeControlTemplateCommand
-                    ?? (_removeControlTemplateCommand = new RelayCommand<Pair<string, vMixControl>>(
+                return _removeWidgetTemplateCommand
+                    ?? (_removeWidgetTemplateCommand = new RelayCommand<Pair<string, vMixControl>>(
                     p =>
                     {
-                        _controlTemplates.Remove(p);
+                        _widgetTemplates.Remove(p);
                     }));
             }
         }
 
-        private RelayCommand<Pair<string, vMixControl>> _editControlTemplateCommand;
+        private RelayCommand<Pair<string, vMixControl>> _editWidgetTemplateCommand;
 
         /// <summary>
-        /// Gets the EditControlTemplateCommand.
+        /// Gets the EditWidgetTemplateCommand.
         /// </summary>
-        public RelayCommand<Pair<string, vMixControl>> EditControlTemplateCommand
+        public RelayCommand<Pair<string, vMixControl>> EditWidgetTemplateCommand
         {
             get
             {
-                return _editControlTemplateCommand
-                    ?? (_editControlTemplateCommand = new RelayCommand<Pair<string, vMixControl>>(
+                return _editWidgetTemplateCommand
+                    ?? (_editWidgetTemplateCommand = new RelayCommand<Pair<string, vMixControl>>(
                     p =>
                     {
                         OpenPropertiesCommand.Execute(p.B);
@@ -897,9 +967,9 @@ namespace vMixController.ViewModel
                     ?? (_newControllerCommand = new RelayCommand(
                     () =>
                     {
-                        foreach (var item in _controls)
+                        foreach (var item in _widgets)
                             item.Dispose();
-                        _controls.Clear();
+                        _widgets.Clear();
                     }));
             }
         }
@@ -917,7 +987,6 @@ namespace vMixController.ViewModel
                     ?? (_loadControllerCommand = new RelayCommand(
                     () =>
                     {
-
                         Ookii.Dialogs.Wpf.VistaOpenFileDialog opendlg = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
                         opendlg.Filter = "vMix Controller|*.vmc";
                         var result = opendlg.ShowDialog(App.Current.MainWindow);
@@ -928,15 +997,20 @@ namespace vMixController.ViewModel
                             var top = WindowSettings.Top;
                             var width = WindowSettings.Width;
                             var height = WindowSettings.Height;
-                            foreach (var item in _controls)
+                            foreach (var item in _widgets)
                                 item.Dispose();
-                            _controls.Clear();
+                            _widgets.Clear();
+
+                            LIVE = true;
 
                             foreach (var item in Utils.LoadController(opendlg.FileName, Functions, out _windowSettings))
-                                _controls.Add(item);
+                                _widgets.Add(item);
 
-                            foreach (var item in _controls)
+                            foreach (var item in _widgets)
                                 item.Update();
+
+
+
 
                             RaisePropertyChanged("WindowSettings");
                             _logger.Info("Configuring API.");
@@ -948,7 +1022,6 @@ namespace vMixController.ViewModel
                             IsUrlValid = vMixAPI.StateFabrique.IsUrlValid(vMixAPI.StateFabrique.GetUrl(WindowSettings.IP, WindowSettings.Port));
 
                             UpdatevMixState();
-
                         }
                     }));
             }
@@ -972,7 +1045,7 @@ namespace vMixController.ViewModel
                         opendlg.DefaultExt = "vmc";
                         var result = opendlg.ShowDialog(App.Current.MainWindow);
                         if (result.HasValue && result.Value)
-                            Utils.SaveController(opendlg.FileName, _controls, _windowSettings);
+                            Utils.SaveController(opendlg.FileName, _widgets, _windowSettings);
 
                     }));
             }
@@ -992,7 +1065,7 @@ namespace vMixController.ViewModel
                     () =>
                     {
                         WindowSettings.Locked = !WindowSettings.Locked;
-                        foreach (var item in _controls)
+                        foreach (var item in _widgets)
                         {
                             item.Locked = WindowSettings.Locked;
                         }
@@ -1059,7 +1132,7 @@ namespace vMixController.ViewModel
             if (Model != null)
                 Model.OnStateUpdated -= Model_OnStateUpdated;
             Model = (vMixAPI.State)sender;
-            foreach (var item in _controls)
+            foreach (var item in _widgets)
                 item.State = Model;
             if (Model != null)
                 Model.OnStateUpdated += Model_OnStateUpdated;
@@ -1076,7 +1149,7 @@ namespace vMixController.ViewModel
             }
             else
             {
-                foreach (var item in _controls)
+                foreach (var item in _widgets)
                     item.State = (vMixAPI.State)sender;
             }
         }
@@ -1085,7 +1158,7 @@ namespace vMixController.ViewModel
         bool ProcessHotkey(Key key, Key systemKey, ModifierKeys modifiers)
         {
             var result = false;
-            foreach (var ctrl in _controls)
+            foreach (var ctrl in _widgets)
             {
                 foreach (var item in ctrl.Hotkey.Select((x, i) => new { obj = x, idx = i }))
                 {
@@ -1109,7 +1182,7 @@ namespace vMixController.ViewModel
 
         void ProcessHotkey(string link)
         {
-            foreach (var ctrl in _controls)
+            foreach (var ctrl in _widgets)
                 foreach (var item in ctrl.Hotkey.Select((x, i) => new { obj = x, idx = i }))
                     if (item.obj.Link == link)
                         ctrl.ExecuteHotkey(item.idx);
@@ -1152,7 +1225,7 @@ namespace vMixController.ViewModel
                         _logger.Info("Saving templates.");
                         XmlSerializer s = new XmlSerializer(typeof(ObservableCollection<Pair<string, vMixControl>>));
                         using (var fs = new FileStream(Path.Combine(_documentsPath, "Templates.xml"), FileMode.Create))
-                            s.Serialize(fs, _controlTemplates);
+                            s.Serialize(fs, _widgetTemplates);
 
                         _logger.Info("Saving window settings.");
                         s = new XmlSerializer(typeof(MainWindowSettings));
@@ -1201,7 +1274,7 @@ namespace vMixController.ViewModel
                 s = new XmlSerializer(typeof(ObservableCollection<Pair<string, vMixControl>>));
                 if (File.Exists(Path.Combine(_documentsPath, "Templates.xml")))
                     using (var fs = new FileStream(Path.Combine(_documentsPath, "Templates.xml"), FileMode.Open))
-                        _controlTemplates = (ObservableCollection<Pair<string, vMixControl>>)s.Deserialize(fs);
+                        _widgetTemplates = (ObservableCollection<Pair<string, vMixControl>>)s.Deserialize(fs);
             }
             catch (Exception)
             {
@@ -1214,9 +1287,9 @@ namespace vMixController.ViewModel
                 s = new XmlSerializer(typeof(MainWindowSettings));
                 if (File.Exists(Path.Combine(_documentsPath, "WindowSettings.xml")))
                     using (var fs = new FileStream(Path.Combine(_documentsPath, "WindowSettings.xml"), FileMode.Open))
-                        _windowSettings = (MainWindowSettings)s.Deserialize(fs);
+                        WindowSettings = (MainWindowSettings)s.Deserialize(fs);
                 else
-                    _windowSettings = new MainWindowSettings();
+                    WindowSettings = new MainWindowSettings();
 
 
 
@@ -1249,7 +1322,7 @@ namespace vMixController.ViewModel
 
             Singleton<SharedData>.Instance.GetData = (name, property) =>
             {
-                var ds = Controls.Where(x => x.Name == name).FirstOrDefault();
+                var ds = Widgets.Where(x => x.Name == name).FirstOrDefault();
                 var result = new List<string>();
                 if (ds == null)
                     return result;
@@ -1263,12 +1336,12 @@ namespace vMixController.ViewModel
 
             Singleton<SharedData>.Instance.GetDataSources = () =>
             {
-                return Controls.Select(x => x.Name).ToList();
+                return Widgets.Select(x => x.Name).ToList();
             };
 
             Singleton<SharedData>.Instance.GetDataSourceProps = (name) =>
             {
-                var ds = Controls.Where(x => x.Name == name).FirstOrDefault();
+                var ds = Widgets.Where(x => x.Name == name).FirstOrDefault();
                 if (ds == null) return new List<string>();
                 return ds.GetType().GetProperties().Where(x =>
                 {
@@ -1279,13 +1352,24 @@ namespace vMixController.ViewModel
 
             Singleton<SharedData>.Instance.GetDataSource = (name) =>
             {
-                var ds = Controls.Where(x => x.Name == name).FirstOrDefault();
+                var ds = Widgets.Where(x => x.Name == name).FirstOrDefault();
                 return ds;
             };
 
+
+            GalaSoft.MvvmLight.Messaging.Messenger.Default.Register<LIVEToggleMessage>(this, (msg) =>
+            {
+                switch (msg.State)
+                {
+                    case 0: LIVE = false; break;
+                    case 1: LIVE = true; break;
+                    case 2: LIVE = !LIVE; break;
+                }
+            });
+
             GalaSoft.MvvmLight.Messaging.Messenger.Default.Register<Triple<vMixControl, double, double>>(this, (t) =>
             {
-                foreach (var item in _controls.Where(x => x.Selected && x != t.A))
+                foreach (var item in _widgets.Where(x => x.Selected && x != t.A))
                 {
                     item.Left = Math.Round(item.Left + t.B);
                     item.Top = Math.Round(item.Top + t.C);
@@ -1320,7 +1404,10 @@ namespace vMixController.ViewModel
             Accord.Video.DirectShow.FilterInfoCollection filters = new Accord.Video.DirectShow.FilterInfoCollection(new Guid("{083863F1-70DE-11D0-BD40-00A0C911CE86}"));
             foreach (var item in filters)
                 if (item.Name.Contains("NewTek NDI Source"))
+                {
+                    IsFiltersRegistered = true;
                     return;
+                }
 
             if (Properties.Settings.Default.NDIFiltersRegistered) return;
 
@@ -1338,7 +1425,7 @@ namespace vMixController.ViewModel
 
                 case Ookii.Dialogs.Wpf.ButtonType.Yes:
                     Process p = new Process();
-                    p.StartInfo = new ProcessStartInfo(Path.Combine(Directory.GetCurrentDirectory(), "RegisterFilters.cmd")) { CreateNoWindow = true, Verb = "runas", Arguments = Directory.GetCurrentDirectory()  };
+                    p.StartInfo = new ProcessStartInfo(Path.Combine(Directory.GetCurrentDirectory(), "RegisterFilters.cmd")) { CreateNoWindow = true, Verb = "runas", Arguments = Directory.GetCurrentDirectory() };
                     p.Start();
                     break;
                 case Ookii.Dialogs.Wpf.ButtonType.Cancel:
@@ -1356,7 +1443,7 @@ namespace vMixController.ViewModel
             {
 
                 var sr = new Rect(SelectorPosition.Left, SelectorPosition.Top, SelectorWidth, SelectorHeight);
-                foreach (var item in _controls)
+                foreach (var item in _widgets)
                 {
                     var ir = new Rect(item.Left, item.Top, item.Width, double.IsNaN(item.Height) || double.IsInfinity(item.Height) ? 0 : item.Height + item.CaptionHeight);
                     item.Selected = (item.Selected || sr.Contains(ir)) && !item.Locked;
@@ -1368,7 +1455,7 @@ namespace vMixController.ViewModel
             }
             SelectorEnabled = false;
             if (!Keyboard.IsKeyDown(Key.LeftCtrl) && !Keyboard.IsKeyDown(Key.RightCtrl))
-                foreach (var item in _controls)
+                foreach (var item in _widgets)
                 {
                     item.Selected = false;
                 }
@@ -1426,7 +1513,7 @@ namespace vMixController.ViewModel
         public override void Cleanup()
         {
             // Clean up if needed
-            foreach (var item in Controls.OfType<IDisposable>())
+            foreach (var item in Widgets.OfType<IDisposable>())
             {
                 item.Dispose();
             }
@@ -1443,6 +1530,32 @@ namespace vMixController.ViewModel
         {
             Dispose(true);
             //throw new NotImplementedException();
+        }
+
+        private RelayCommand _registerNDIFilters;
+
+        /// <summary>
+        /// Gets the RegisterNDIFilters.
+        /// </summary>
+        public RelayCommand RegisterNDIFilters
+        {
+            get
+            {
+                return _registerNDIFilters
+                    ?? (_registerNDIFilters = new RelayCommand(
+                    () =>
+                    {
+                        Process p = new Process();
+                        p.StartInfo = new ProcessStartInfo(Path.Combine(Directory.GetCurrentDirectory(), "RegisterFilters.cmd")) { CreateNoWindow = true, Verb = "runas", Arguments = Directory.GetCurrentDirectory() };
+                        try
+                        {
+                            p.Start();
+                        }
+                        catch (Exception) { }
+                        _isFiltersRegistered = true;
+                    },
+                    () => !IsFiltersRegistered));
+            }
         }
 
 
@@ -1494,7 +1607,7 @@ namespace vMixController.ViewModel
                     p =>
                     {
                         _isHotkeysEnabled = false;
-                       // GalaSoft.MvvmLight.Messaging.Messenger.Default.Send(new Pair<string, bool>() { A = "Hotkeys", B = false });
+                        // GalaSoft.MvvmLight.Messaging.Messenger.Default.Send(new Pair<string, bool>() { A = "Hotkeys", B = false });
                     }));
             }
         }
@@ -1514,6 +1627,43 @@ namespace vMixController.ViewModel
                     {
                         _isHotkeysEnabled = true;
                         //GalaSoft.MvvmLight.Messaging.Messenger.Default.Send(new Pair<string, bool>() { A = "Hotkeys", B = true });
+                    }));
+            }
+        }
+
+        private RelayCommand _aboutCommand;
+
+        /// <summary>
+        /// Gets the AboutCommand.
+        /// </summary>
+        public RelayCommand AboutCommand
+        {
+            get
+            {
+                return _aboutCommand
+                    ?? (_aboutCommand = new RelayCommand(
+                    () =>
+                    {
+                        Ookii.Dialogs.Wpf.TaskDialog td = new Ookii.Dialogs.Wpf.TaskDialog();
+                        td.WindowTitle = "About";
+
+                        td.MainInstruction = "Title controller, which works through official vMix API.\nYou can made configurable interface from some default widgets.";
+                        td.MainIcon = Ookii.Dialogs.Wpf.TaskDialogIcon.Information;
+                        td.Footer = Title;
+
+                        var forumbtn = new Ookii.Dialogs.Wpf.TaskDialogButton(Ookii.Dialogs.Wpf.ButtonType.Custom) { Text = "vMix Forum" };
+                        var donatebtn = new Ookii.Dialogs.Wpf.TaskDialogButton(Ookii.Dialogs.Wpf.ButtonType.Custom) { Text = "Donate" };
+                        td.Buttons.Add(forumbtn);
+                        td.Buttons.Add(donatebtn);
+                        td.Buttons.Add(new Ookii.Dialogs.Wpf.TaskDialogButton(Ookii.Dialogs.Wpf.ButtonType.Close) { Default = true });
+
+                        var btn = td.ShowDialog();
+                        if (btn == forumbtn)
+                            Process.Start(new ProcessStartInfo("https://forums.vmix.com/default.aspx?g=posts&t=6468"));
+                        else if (btn == donatebtn)
+                            Process.Start(new ProcessStartInfo("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WT9QZ2XH97HMN&lc=US&item_name=vMix%20Universal%20Title%20Controller&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted"));
+
+
                     }));
             }
         }

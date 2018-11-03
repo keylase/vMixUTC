@@ -126,7 +126,7 @@ namespace vMixController.Widgets
             return base.GetPropertiesControls().Concat(new UserControl[] { _filepath }).Concat(_props).ToArray();
         }
 
-        public override void SetProperties(vMixControlSettingsViewModel viewModel)
+        public override void SetProperties(vMixWidgetSettingsViewModel viewModel)
         {
             base.SetProperties(viewModel);
 

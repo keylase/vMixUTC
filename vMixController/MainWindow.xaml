@@ -20,7 +20,7 @@
         
         Left="{Binding WindowSettings.Left, Mode=TwoWay}"
         Top="{Binding WindowSettings.Top, Mode=TwoWay}"
-        Width="{Binding WindowSettings.Width, Mode=TwoWay}"
+        Width="1062.828"
         Height="{Binding WindowSettings.Height, Mode=TwoWay}"
         WindowState="{Binding WindowSettings.State, Mode=TwoWay}"
         Title="{Binding Title}"
@@ -39,65 +39,65 @@
             <c:BoolToBrushConverter x:Key="BoolToBrush"/>
             <Rect x:Key="IconViewbox">0.18,0.18,0.64,0.64</Rect>
             <CompositeCollection x:Key="CreateItems" x:Shared="False">
-                <MenuItem x:Name="Button" Command="{Binding CreateControlCommand}" CommandParameter="Button" Header="{e:Localize Button}">
+                <MenuItem x:Name="Button" Command="{Binding CreateWidgetCommand}" CommandParameter="Button" Header="{e:Localize Button}">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="/vMixControllerSkin;Component/#Material Design Icons">&#xF131;</TextBlock>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem x:Name="Label" Command="{Binding CreateControlCommand}" CommandParameter="Label" Header="{e:Localize Label}">
+                <MenuItem x:Name="Label" Command="{Binding CreateWidgetCommand}" CommandParameter="Label" Header="{e:Localize Label}">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="/vMixControllerSkin;Component/#FontAwesome">&#xF02B;</TextBlock>
                     </MenuItem.Icon>
                 </MenuItem>
-                <!--<MenuItem Command="{Binding CreateControlCommand}" CommandParameter="Image" Header="Image"/>-->
-                <MenuItem x:Name="List" Command="{Binding CreateControlCommand}" CommandParameter="List" Header="{e:Localize List}">
+                <!--<MenuItem Command="{Binding CreateWidgetCommand}" CommandParameter="Image" Header="Image"/>-->
+                <MenuItem x:Name="List" Command="{Binding CreateWidgetCommand}" CommandParameter="List" Header="{e:Localize List}">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="/vMixControllerSkin;Component/#FontAwesome">&#xF03A;</TextBlock>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem x:Name="Score" Command="{Binding CreateControlCommand}" CommandParameter="Score" Header="{e:Localize Score}">
+                <MenuItem x:Name="Score" Command="{Binding CreateWidgetCommand}" CommandParameter="Score" Header="{e:Localize Score}">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="/vMixControllerSkin;Component/#FontAwesome">&#xF005;</TextBlock>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem x:Name="TextField" Command="{Binding CreateControlCommand}" CommandParameter="TextField" Header="{e:Localize Text Field}">
+                <MenuItem x:Name="TextField" Command="{Binding CreateWidgetCommand}" CommandParameter="TextField" Header="{e:Localize Text Field}">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="/vMixControllerSkin;Component/#Material Design Icons">&#xF60E;</TextBlock>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem x:Name="Timer" Command="{Binding CreateControlCommand}" CommandParameter="Timer" Header="{e:Localize Timer}">
+                <MenuItem x:Name="Timer" Command="{Binding CreateWidgetCommand}" CommandParameter="Timer" Header="{e:Localize Timer}">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="/vMixControllerSkin;Component/#Material Design Icons">&#xF51B;</TextBlock>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem x:Name="Clock" Command="{Binding CreateControlCommand}" CommandParameter="Clock" Header="{e:Localize Clock}">
+                <MenuItem x:Name="Clock" Command="{Binding CreateWidgetCommand}" CommandParameter="Clock" Header="{e:Localize Clock}">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="/vMixControllerSkin;Component/#Material Design Icons">&#xF150;</TextBlock>
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
-                <MenuItem x:Name="Container" Command="{Binding CreateControlCommand}" CommandParameter="Container" Header="{e:Localize Container}">
+                <MenuItem x:Name="Container" Command="{Binding CreateWidgetCommand}" CommandParameter="Container" Header="{e:Localize Container}">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="/vMixControllerSkin;Component/#FontAwesome">&#xF1B2;</TextBlock>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem x:Name="ExternalData" Command="{Binding CreateControlCommand}" CommandParameter="ExternalData" Header="{e:Localize External Data}">
+                <MenuItem x:Name="ExternalData" Command="{Binding CreateWidgetCommand}" CommandParameter="ExternalData" Header="{e:Localize External Data}">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="/vMixControllerSkin;Component/#FontAwesome">&#xF1C0;</TextBlock>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem x:Name="MidiInterface" Command="{Binding CreateControlCommand}" CommandParameter="MidiInterface" Header="{e:Localize MIDI Device}">
+                <MenuItem x:Name="MidiInterface" Command="{Binding CreateWidgetCommand}" CommandParameter="MidiInterface" Header="{e:Localize MIDI Device}">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="/vMixControllerSkin;Component/#FontAwesome">&#xF0E7;</TextBlock>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem x:Name="MultiState" Command="{Binding CreateControlCommand}" CommandParameter="MultiState" Header="{e:Localize Multi State}">
+                <MenuItem x:Name="MultiState" Command="{Binding CreateWidgetCommand}" CommandParameter="MultiState" Header="{e:Localize Multi State}">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="/vMixControllerSkin;Component/#FontAwesome">&#xF233;</TextBlock>
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
-                <MenuItem x:Name="Templates" Header="{e:Localize Templates}" ItemsSource="{Binding ControlTemplates}" IsEnabled="{Binding Items.Count, Converter={StaticResource IntegerToBooleanConverter}, Mode=OneWay, RelativeSource={RelativeSource Self}}">
+                <MenuItem x:Name="Templates" Header="{e:Localize Templates}" ItemsSource="{Binding WidgetTemplates}" IsEnabled="{Binding Items.Count, Converter={StaticResource IntegerToBooleanConverter}, Mode=OneWay, RelativeSource={RelativeSource Self}}">
                     <MenuItem.ItemTemplate>
                         <DataTemplate>
                             <TextBlock><Run Text="["/><InlineUIContainer>
@@ -126,10 +126,10 @@
                             <Setter Property="ItemsSource">
                                 <Setter.Value>
                                     <CompositeCollection>
-                                        <MenuItem Icon="{x:Null}" ItemsSource="{x:Null}" Header="{e:Localize Add Widget}" Command="{Binding Main.CreateControlFromTemplateCommand, Source={StaticResource Locator}}" CommandParameter="{Binding}"/>
+                                        <MenuItem Icon="{x:Null}" ItemsSource="{x:Null}" Header="{e:Localize Add Widget}" Command="{Binding Main.CreateWidgetFromTemplateCommand, Source={StaticResource Locator}}" CommandParameter="{Binding}"/>
                                         <Separator/>
-                                        <MenuItem Icon="{x:Null}" ItemsSource="{x:Null}" Header="{e:Localize Edit Template}" Command="{Binding Main.EditControlTemplateCommand, Source={StaticResource Locator}}" CommandParameter="{Binding}"/>
-                                        <MenuItem Icon="{x:Null}" ItemsSource="{x:Null}" Header="{e:Localize Remove Template}" Command="{Binding Main.RemoveControlTemplateCommand, Source={StaticResource Locator}}" CommandParameter="{Binding}"/>
+                                        <MenuItem Icon="{x:Null}" ItemsSource="{x:Null}" Header="{e:Localize Edit Template}" Command="{Binding Main.EditWidgetTemplateCommand, Source={StaticResource Locator}}" CommandParameter="{Binding}"/>
+                                        <MenuItem Icon="{x:Null}" ItemsSource="{x:Null}" Header="{e:Localize Remove Template}" Command="{Binding Main.RemoveWidgetTemplateCommand, Source={StaticResource Locator}}" CommandParameter="{Binding}"/>
                                     </CompositeCollection>
                                 </Setter.Value>
                             </Setter>
@@ -178,13 +178,19 @@
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
+                <MenuItem Command="{Binding AboutCommand}" Header="{e:Localize About}">
+                    <MenuItem.Icon>
+                        <TextBlock FontFamily="/vMixControllerSkin;Component/#FontAwesome">&#xF05A;</TextBlock>
+                    </MenuItem.Icon>                    
+                </MenuItem>
+                <Separator/>
                 <MenuItem Command="{Binding ExitCommand}"  Header="{e:Localize Exit}">
                     <MenuItem.Icon>
                         <TextBlock FontFamily="/vMixControllerSkin;Component/#FontAwesome">&#xF08B;</TextBlock>
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
-            <MenuItem Header="{e:Localize Create}" ItemsSource="{DynamicResource CreateItems}">
+            <MenuItem Header="{e:Localize Widget}" ItemsSource="{DynamicResource CreateItems}">
                 <MenuItem.ItemContainerStyle>
                     <Style TargetType="MenuItem">
                         <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -207,7 +213,7 @@
             </MenuItem>
         </Menu>
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1">
-            <ListView ItemsSource="{Binding Controls}" Tag="{Binding WindowSettings.Locked, Mode=TwoWay}">
+            <ListView ItemsSource="{Binding Widgets}" Tag="{Binding WindowSettings.Locked, Mode=TwoWay}">
                 <ListView.ContextMenu>
                     <ContextMenu x:Name="CreateContextMenu" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" ItemsSource="{DynamicResource CreateItems}">
                         <ContextMenu.Resources>
@@ -369,6 +375,37 @@
                 </StackPanel>
             </StatusBarItem>
             <Separator/>
+            <!--<StatusBarItem  HorizontalAlignment="Right" HorizontalContentAlignment="Right">
+                <CheckBox IsChecked="{Binding LIVE, Mode=TwoWay}">LIVE</CheckBox>
+            </StatusBarItem>-->
+            <StatusBarItem  HorizontalAlignment="Right" HorizontalContentAlignment="Right">
+                <CheckBox IsChecked="{Binding LIVE, Mode=TwoWay}" FontWeight="Bold">LIVE
+                    <CheckBox.Style>
+                        <Style TargetType="CheckBox">
+                            <Style.Setters>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="CheckBox">
+                                            <Grid x:Name="back" Background="Red">
+                                                <ContentPresenter Margin="2"/>
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                </Trigger>
+                                                <Trigger Property="IsChecked" Value="False">
+                                                    <Setter Property="Background" Value="Yellow" TargetName="back"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style.Setters>
+                        </Style>
+                    </CheckBox.Style>
+                </CheckBox>
+            </StatusBarItem>
+            
             <StatusBarItem  HorizontalAlignment="Right" HorizontalContentAlignment="Right">
                 <CheckBox IsChecked="{Binding WindowSettings.IsTopmost, Mode=TwoWay}">Is Topmost</CheckBox>
             </StatusBarItem>
@@ -376,9 +413,14 @@
                 <CheckBox IsChecked="{Binding WindowSettings.EnableLog, Mode=TwoWay}">Enable Log</CheckBox>
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right" HorizontalContentAlignment="Right">
-                <Hyperlink ToolTip="{e:Localize Support vMix Universal Title Controller!}" NavigateUri="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=WT9QZ2XH97HMN&amp;lc=US&amp;item_name=vMix%20Universal%20Title%20Controller&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted" RequestNavigate="Hyperlink_RequestNavigate">
-                    <Image Source="/vMixControllerSkin;component\btn_donate_SM.gif" Stretch="None" Cursor="Hand"/>
-                </Hyperlink>
+                <StackPanel Orientation="Horizontal">
+                    <Button Margin="0,0,8,0" Command="{Binding RegisterNDIFilters}">Register Filters</Button>
+                    <TextBlock>
+                    <Hyperlink ToolTip="{e:Localize Support vMix Universal Title Controller!}" NavigateUri="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=WT9QZ2XH97HMN&amp;lc=US&amp;item_name=vMix%20Universal%20Title%20Controller&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted" RequestNavigate="Hyperlink_RequestNavigate">
+                        <Image Source="/vMixControllerSkin;component\btn_donate_SM.gif" Stretch="None" Cursor="Hand"/>
+                    </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
             </StatusBarItem>
         </StatusBar>
     </Grid>
